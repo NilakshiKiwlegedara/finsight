@@ -127,6 +127,71 @@ Assign each referenced category to the same user as its transactions/budgets; do
 not bulk-assign everything to whichever user logs in first. Shared legacy categories
 need separate per-user copies when records belong to different users.
 
+## Dashboard and analytics
+
+Both endpoints require `Authorization: Bearer <token>` and always use the
+authenticated user. There is no `userId` input. Legacy unowned rows are excluded.
+
+### GET /api/dashboard
+
+Returns these fields:
+
+| Field | Meaning |
+| --- | --- |
+| `month` | Current calendar month, formatted `YYYY-MM` |
+| `currentBalance` | All recorded INCOME minus all recorded EXPENSE transactions |
+| `monthlyIncome`, `monthlyExpenses` | Totals within the current calendar month |
+| `activeBudgetCount` | Number of budget records for the current month and year |
+| `totalBudgetCount` | Number of all budget records belonging to this user, across all periods |
+| `recentTransactions` | At most five records, ordered by transaction date descending, then ID descending |
+| `budgetOverview` | Current-month budgets with `id`, `category`, `budgetAmount`, `amountSpent`, `remainingAmount`, `percentageUsed` |
+| `categorySpending` | Current-month EXPENSE totals, each with `category` and `amountSpent` |
+
+`category` contains only `id`, `name`, and `type`. Recent transactions contain
+`id`, `amount`, `type`, `date`, `description`, and this category summary. No user
+entities, hashes, or secrets appear in reporting responses.
+
+Budget spending matches the authenticated user, category ID, month, and year,
+and includes only EXPENSE transactions. Remaining amount is budget minus spending;
+percentage used is spending / budget * 100, rounded HALF_UP to two decimal places.
+Overspent budgets show negative remaining amounts and percentages above 100.
+Legacy zero/non-positive budgets return 0.00 percentage instead of dividing by zero.
+If multiple budgets exist for the same category/month, each shows that category's
+same spending against its own limit; transactions are not counted again in totals.
+
+### GET /api/analytics?months=6
+
+`months` defaults to 6 and accepts 1–24; invalid values return the existing JSON
+400 response. The interval includes the current month and the preceding months.
+Response fields are `startMonth`, `endMonth` (inclusive `YYYY-MM`), `months`,
+`monthlyTrends`, and `categorySpending`.
+
+Each trend contains `month`, `income`, `expenses`, and `netAmount` (income minus
+expenses). Trends run oldest to newest, including zero-filled months with no data.
+They directly support income/expense comparison and monthly net charts. Category
+spending covers the whole selected interval, grouped by category ID and sorted by
+amount descending, then category ID. Categories with no expense activity are omitted.
+
+Amounts use BigDecimal and are returned as JSON numbers with two decimal places.
+Transaction type determines income/expense, not the category's type. All-time balance
+and recent transactions include future-dated stored records. Monthly windows cover
+the full month (first day inclusive, first day of the following month exclusive),
+including future-dated records within that month; future months are excluded from
+current-month reports and analytics. Monthly `netAmount` is not a cumulative balance.
+
+The server's JVM time zone determines the current month; run it in the intended
+business time zone (for example `Asia/Colombo`). An injectable Clock fixes dates in
+tests. New accounts return zero totals, empty lists, and zero-filled monthly trends.
+Queries aggregate in the database and fetch categories with budgets/recent transactions
+to avoid per-record queries. No schema changes or new dependencies are required.
+
+For PostgreSQL/Postman verification, create income and expense entries on each side
+of a month/year boundary. Check dashboard totals, a budget's spending/remaining values,
+the latest five records, and `/api/analytics?months=6`. Repeat with another user's JWT
+and an empty account. Check `months=0` returns 400 and requests without JWT return 401.
+H2 tests verify behavior, but PostgreSQL aggregate-query execution and local time-zone
+configuration should also be checked on your running backend.
+
 ### Tests
 
 Run `./mvnw.cmd test` from the project root. Tests use a test-only H2 in-memory

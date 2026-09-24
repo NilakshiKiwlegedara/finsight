@@ -3,6 +3,8 @@ package com.finsight_backend.controller;
 import com.finsight_backend.entity.Category;
 import com.finsight_backend.service.CategoryService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import com.finsight_backend.dto.CategoryRequest;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    public Category createCategory(@RequestBody Category category) {
+    public Category createCategory(@Valid @RequestBody CategoryRequest category) {
         return categoryService.createCategory(category);
     }
 

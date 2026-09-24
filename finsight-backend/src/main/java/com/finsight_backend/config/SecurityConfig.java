@@ -2,7 +2,7 @@ package com.finsight_backend.config;
 
 import com.finsight_backend.repository.UserRepository;
 import com.finsight_backend.service.JwtService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.finsight_backend.exception.ApiError;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import org.springframework.context.annotation.Bean;
@@ -32,7 +32,9 @@ public class SecurityConfig {
                 .logout(logout -> logout.disable())
                 .requestCache(cache -> cache.disable())
                 .exceptionHandling(errors -> errors.authenticationEntryPoint(
-                        (request, response, exception) -> response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)))
+                        (request, response, exception) -> ApiError.write(response, 401, "Authentication required"))
+                        .accessDeniedHandler((request, response, exception) ->
+                                ApiError.write(response, 403, "Access denied")))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

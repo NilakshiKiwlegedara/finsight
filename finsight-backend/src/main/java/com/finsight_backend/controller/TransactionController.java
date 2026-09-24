@@ -3,6 +3,8 @@ package com.finsight_backend.controller;
 import com.finsight_backend.entity.Transaction;
 import com.finsight_backend.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import com.finsight_backend.dto.TransactionRequest;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public Transaction createTransaction(@RequestBody Transaction transaction) {
+    public Transaction createTransaction(@Valid @RequestBody TransactionRequest transaction) {
         return transactionService.createTransaction(transaction);
     }
 
@@ -34,7 +36,7 @@ public class TransactionController {
     @PutMapping("/{id}")
     public Transaction updateTransaction(
             @PathVariable Long id,
-            @RequestBody Transaction transaction) {
+            @Valid @RequestBody TransactionRequest transaction) {
 
         return transactionService.updateTransaction(id, transaction);
     }

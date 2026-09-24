@@ -1,6 +1,7 @@
 package com.finsight_backend.service;
 
 import com.finsight_backend.entity.Category;
+import com.finsight_backend.dto.CategoryRequest;
 import com.finsight_backend.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,11 @@ public class CategoryService {
         this.currentUserService = currentUserService;
     }
 
-    public Category createCategory(Category category) {
+    public Category createCategory(CategoryRequest category) {
         Category created = new Category();
-        created.setName(category.getName());
-        created.setType(category.getType());
-        created.setDefault(category.isDefault());
+        created.setName(category.name());
+        created.setType(category.type());
+        created.setDefault(false);
         created.setUser(currentUserService.getCurrentUser());
         return categoryRepository.save(created);
     }

@@ -2,6 +2,8 @@ package com.finsight_backend.controller;
 
 import com.finsight_backend.dto.LoginRequestDTO;
 import com.finsight_backend.dto.LoginResponseDTO;
+import com.finsight_backend.dto.RegistrationRequest;
+import jakarta.validation.Valid;
 import com.finsight_backend.entity.User;
 import com.finsight_backend.service.AuthService;
 import org.springframework.web.bind.annotation.*;
@@ -18,13 +20,17 @@ public class AuthController {
 
     // Register
     @PostMapping("/register")
-    public User register(@RequestBody User user) {
+    public User register(@Valid @RequestBody RegistrationRequest request) {
+        User user = new User();
+        user.setName(request.name());
+        user.setEmail(request.email());
+        user.setPassword(request.password());
         return authService.register(user);
     }
 
     // Login
     @PostMapping("/login")
-    public LoginResponseDTO login(@RequestBody LoginRequestDTO request) {
+    public LoginResponseDTO login(@Valid @RequestBody LoginRequestDTO request) {
 
         String token = authService.login(
                 request.getEmail(),

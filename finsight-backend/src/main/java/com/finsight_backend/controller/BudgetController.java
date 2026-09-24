@@ -3,6 +3,8 @@ package com.finsight_backend.controller;
 import com.finsight_backend.entity.Budget;
 import com.finsight_backend.service.BudgetService;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import com.finsight_backend.dto.BudgetRequest;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class BudgetController {
     }
 
     @PostMapping
-    public Budget createBudget(@RequestBody Budget budget) {
+    public Budget createBudget(@Valid @RequestBody BudgetRequest budget) {
         return budgetService.createBudget(budget);
     }
 
@@ -34,7 +36,7 @@ public class BudgetController {
     @PutMapping("/{id}")
     public Budget updateBudget(
             @PathVariable Long id,
-            @RequestBody Budget budget) {
+            @Valid @RequestBody BudgetRequest budget) {
         return budgetService.updateBudget(id, budget);
     }
 

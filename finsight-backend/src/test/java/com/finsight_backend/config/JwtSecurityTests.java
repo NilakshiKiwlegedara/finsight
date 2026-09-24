@@ -5,6 +5,8 @@ import com.finsight_backend.entity.User;
 import com.finsight_backend.repository.UserRepository;
 import com.finsight_backend.service.AuthService;
 import com.finsight_backend.service.JwtService;
+import com.finsight_backend.service.DefaultCategoryService;
+import com.finsight_backend.exception.ApiExceptionHandler;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -136,10 +138,11 @@ class JwtSecurityTests {
     @Configuration
     @EnableWebSecurity
     @EnableWebMvc
-    @Import({SecurityConfig.class, AuthController.class, AuthService.class, ProbeController.class})
+    @Import({SecurityConfig.class, AuthController.class, AuthService.class, ProbeController.class, ApiExceptionHandler.class})
     static class TestConfig {
         @Bean UserRepository users() { return mock(UserRepository.class); }
         @Bean JwtService jwt() { return new JwtService(SECRET); }
+        @Bean DefaultCategoryService defaults() { return mock(DefaultCategoryService.class); }
     }
 
     @RestController

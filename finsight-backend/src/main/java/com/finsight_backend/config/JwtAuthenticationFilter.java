@@ -2,6 +2,7 @@ package com.finsight_backend.config;
 
 import com.finsight_backend.repository.UserRepository;
 import com.finsight_backend.service.JwtService;
+import com.finsight_backend.exception.ApiError;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -46,16 +47,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email;
             try {
                 if (!jwtService.isTokenValid(token)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    ApiError.write(response, 401, "Invalid or expired token");
                     return;
                 }
                 email = jwtService.extractEmail(token);
             } catch (JwtException | IllegalArgumentException exception) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                ApiError.write(response, 401, "Invalid or expired token");
                 return;
             }
             if (email == null || email.isBlank() || !userRepository.existsByEmail(email)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                ApiError.write(response, 401, "Invalid or expired token");
                 return;
             }
             var authentication = new UsernamePasswordAuthenticationToken(email, null, List.of());

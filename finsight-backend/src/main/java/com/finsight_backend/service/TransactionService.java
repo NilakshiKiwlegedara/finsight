@@ -1,6 +1,7 @@
 package com.finsight_backend.service;
 
 import com.finsight_backend.entity.Transaction;
+import com.finsight_backend.dto.TransactionRequest;
 import com.finsight_backend.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
@@ -23,14 +24,14 @@ public class TransactionService {
         this.categoryService = categoryService;
     }
 
-    public Transaction createTransaction(Transaction transaction) {
+    public Transaction createTransaction(TransactionRequest transaction) {
         Transaction created = new Transaction();
-        created.setAmount(transaction.getAmount());
-        created.setType(transaction.getType());
-        created.setDate(transaction.getDate());
-        created.setDescription(transaction.getDescription());
+        created.setAmount(transaction.amount());
+        created.setType(transaction.type());
+        created.setDate(transaction.date());
+        created.setDescription(transaction.description());
         created.setUser(currentUserService.getCurrentUser());
-        created.setCategory(categoryService.getCategoryById(transaction.getCategory() == null ? null : transaction.getCategory().getId()));
+        created.setCategory(categoryService.getCategoryById(transaction.category() == null ? null : transaction.category().id()));
         return transactionRepository.save(created);
     }
 
@@ -45,15 +46,15 @@ public class TransactionService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transaction not found"));
     }
 
-    public Transaction updateTransaction(Long id, Transaction updatedTransaction) {
+    public Transaction updateTransaction(Long id, TransactionRequest updatedTransaction) {
 
         Transaction existingTransaction = getTransactionById(id);
 
-        existingTransaction.setAmount(updatedTransaction.getAmount());
-        existingTransaction.setType(updatedTransaction.getType());
-        existingTransaction.setDate(updatedTransaction.getDate());
-        existingTransaction.setDescription(updatedTransaction.getDescription());
-        existingTransaction.setCategory(categoryService.getCategoryById(updatedTransaction.getCategory() == null ? null : updatedTransaction.getCategory().getId()));
+        existingTransaction.setAmount(updatedTransaction.amount());
+        existingTransaction.setType(updatedTransaction.type());
+        existingTransaction.setDate(updatedTransaction.date());
+        existingTransaction.setDescription(updatedTransaction.description());
+        existingTransaction.setCategory(categoryService.getCategoryById(updatedTransaction.category() == null ? null : updatedTransaction.category().id()));
 
         return transactionRepository.save(existingTransaction);
     }
